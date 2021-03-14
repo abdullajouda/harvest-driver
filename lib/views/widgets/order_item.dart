@@ -3,8 +3,9 @@ import 'package:harvest_driver/models/order-product.dart';
 
 class OrderItem extends StatelessWidget {
   final OrderProduct product;
+  final Color color;
 
-  const OrderItem({Key key, this.product}) : super(key: key);
+  const OrderItem({Key key, this.product, this.color}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +53,7 @@ class OrderItem extends StatelessWidget {
                     product.product.name,
                     style: TextStyle(
                       fontSize: 16,
-                      color: const Color(0xff3c984f),
+                      color: color!= null ?color: Color(0xff3c984f),
                       fontWeight: FontWeight.w600,
                     ),
                     textAlign: TextAlign.left,
@@ -61,7 +62,7 @@ class OrderItem extends StatelessWidget {
                     '${product.product.price}\$/${product.product.typeName}',
                     style: TextStyle(
                       fontSize: 10,
-                      color: const Color(0xff3c984f),
+                      color: color!= null ?color: Color(0xff3c984f),
                       fontWeight: FontWeight.w500,
                     ),
                     textAlign: TextAlign.left,

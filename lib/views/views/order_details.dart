@@ -32,6 +32,9 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   bool load = true;
 
   getDetails() async {
+    setState(() {
+      load = true;
+    });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var request = await get(
         ApiHelper.api + 'getDriverOrderDetail/${widget.order.id}',
@@ -51,11 +54,17 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     });
   }
 
-  onConfirm() {
+  onConfirm(int id) {
     showCupertinoDialog(
       context: context,
-      builder: (context) => Center(child: ConfirmDialog()),
-    );
+      builder: (context) => Center(
+          child: ConfirmDialog(
+        orderId: widget.order.id,
+        status: id,
+      )),
+    ).then((value) {
+      getDetails();
+    });
   }
 
   onAdd() {
@@ -165,6 +174,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                             horizontal: 20, vertical: 10),
                         child: OrderItem(
                           product: details.orderProduct[index],
+                          color: color(),
                         ),
                       ),
                     ),
@@ -287,76 +297,81 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                     )
                   ],
                 ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              height: 118,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(21.0),
-                  topRight: Radius.circular(21.0),
-                ),
-                color: const Color(0xffffffff),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0x17000000),
-                    offset: Offset(0, -5),
-                    blurRadius: 11,
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    onTap: () => onConfirm(),
-                    child: Container(
-                      height: 40,
-                      width: 147,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(7.0),
-                          border: Border.all(color: color())),
-                      child: Center(
-                          child: Text(
-                        'Cancel',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: color(),
-                          fontWeight: FontWeight.w500,
-                        ),
-                        textAlign: TextAlign.left,
-                      )),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  GestureDetector(
-                    onTap: () => onConfirm(),
-                    child: Container(
-                      height: 40,
-                      width: 147,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(7.0),
-                        color: color(),
+          widget.order.status == 1 || widget.order.status == 2
+              ? Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    height: 80,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(21.0),
+                        topRight: Radius.circular(21.0),
                       ),
-                      child: Center(
-                        child: Text(
-                          'Delivered',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: const Color(0xffffffff),
-                            fontWeight: FontWeight.w500,
+                      color: const Color(0xffffffff),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0x17000000),
+                          offset: Offset(0, -5),
+                          blurRadius: 11,
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () => onConfirm(4),
+                          child: Container(
+                            height: 40,
+                            width: 147,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(7.0),
+                                border: Border.all(color: color())),
+                            child: Center(
+                                child: Text(
+                              'Cancel',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: color(),
+                                fontWeight: FontWeight.w500,
+                              ),
+                              textAlign: TextAlign.left,
+                            )),
                           ),
-                          textAlign: TextAlign.left,
                         ),
-                      ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        GestureDetector(
+                          onTap: () =>
+                              onConfirm(widget.order.status == 1 ? 2 : 3),
+                          child: Container(
+                            height: 40,
+                            width: 147,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(7.0),
+                              color: color(),
+                            ),
+                            child: Center(
+                              child: Text(
+                                widget.order.status == 1
+                                    ? 'Preparing'
+                                    : 'Delivered',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: const Color(0xffffffff),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          )
+                )
+              : Container()
         ],
       ),
     );

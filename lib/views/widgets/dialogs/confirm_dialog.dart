@@ -1,8 +1,48 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:harvest_driver/helpers/api.dart';
 import 'package:harvest_driver/helpers/colors.dart';
+import 'package:http/http.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class ConfirmDialog extends StatelessWidget {
+class ConfirmDialog extends StatefulWidget {
+  final int orderId;
+  final int status;
+
+  const ConfirmDialog({Key key, this.orderId, this.status}) : super(key: key);
+
+  @override
+  _ConfirmDialogState createState() => _ConfirmDialogState();
+}
+
+class _ConfirmDialogState extends State<ConfirmDialog> {
+  bool load = false;
+
+  changeStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      load = true;
+    });
+    var request =
+        await post(ApiHelper.api + 'changeOrderStatusByDriver', body: {
+      'order_id': '${widget.orderId}',
+      'status': '${widget.status}'
+    }, headers: {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer ${prefs.getString('userToken')}',
+      'Accept-Language': prefs.getString('language'),
+    });
+    var response = json.decode(request.body);
+    Fluttertoast.showToast(msg: response['message']);
+    if (response['status'] == true) {
+      Navigator.pop(context);
+    }
+
+  }
+
   @override
   Widget build(BuildContext context) {
     // Size size = MediaQuery.of(context).size;
@@ -69,9 +109,9 @@ class ConfirmDialog extends StatelessWidget {
                               height: 35,
                               width: 84,
                               decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(7.0),
-                                  border:
-                                      Border.all(color: CColors.darkOrange),),
+                                borderRadius: BorderRadius.circular(7.0),
+                                border: Border.all(color: CColors.darkOrange),
+                              ),
                               child: Center(
                                   child: Text(
                                 'No',
@@ -89,7 +129,7 @@ class ConfirmDialog extends StatelessWidget {
                             width: 10,
                           ),
                           GestureDetector(
-                            onTap: () => Navigator.pop(context),
+                            onTap: () => changeStatus(),
                             child: Container(
                               height: 35,
                               width: 84,
